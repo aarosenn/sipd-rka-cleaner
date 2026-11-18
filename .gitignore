@@ -3,7 +3,16 @@ __pycache__/
 *$py.class
 *.tmp
 _temp_engine.ps1
-~$*.xlsx
-~$*.xls
+.venv/
+venv/
+ENV/
 *.log
 .env
+
+# Data Excel & Sensitif (Dokumen Anggaran/RKA Daerah)
+# Menghindari data riil APBD/RKA ter-commit ke repositori publik
+*.xlsx
+*.xls
+*.csv
+!examples/*.xlsx
+!examples/*.xls

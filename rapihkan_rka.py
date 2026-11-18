@@ -4,7 +4,7 @@ SCRIPT AUTOMASI: PERAPI RKA BELANJA SIPD KE EXCEL COMPACT & RAPI
 ================================================================================
 Fungsi:
 1. Membaca file RKA hasil konversi PDFgear yang berantakan (banyak kolom/baris liar).
-2. Mengekstrak 44 kode rekening beserta nominal belanja (Sebelum & Sesudah).
+2. Mengekstrak kode rekening beserta nominal belanja (Sebelum & Sesudah).
 3. Mengatur lebar kolom Nomor Rekening secara presisi berbasis digit terpanjang (21 digit).
 4. Menyusun tata letak hemat ruang (compact), menghilangkan merge cell liar dan baris ganda.
 5. Memberikan indentasi hierarki akun (Level 1 s/d Level 6) serta pewarnaan visual.
@@ -18,22 +18,28 @@ import sys
 import subprocess
 
 def rapihkan_rka(source_path=None, output_dir=None):
-    base_dir = r"C:\Users\a_ros\Documents\PDFgear"
+    # ============================================================================
+    # KONFIGURASI PATH & FILE
+    # Petunjuk: Sesuaikan folder dan nama file dengan file RKA hasil konversi Anda.
+    # ============================================================================
+    # Default folder: folder Documents/PDFgear milik pengguna aktif (Windows)
+    base_dir = os.path.join(os.path.expanduser("~"), "Documents", "PDFgear")
     
     if not source_path:
         source_path = os.path.join(
             base_dir,
-            "Sistem Informasi Pemerintahan Daerah - Cetak RKA Rincian Belanja _ 2.16.01.2.02.0001 Penyediaan Gaji dan Tunjangan ASN conv 1.xls"
+            "contoh_rka_cetak_sipd_xxx.xls"  # <-- Ganti dengan nama file .xls sumber Anda
         )
         
     if not output_dir:
-        output_dir = os.path.dirname(source_path)
+        output_dir = os.path.dirname(source_path) if os.path.dirname(source_path) else "."
 
-    output_xlsx = os.path.join(output_dir, "RKA_Penyediaan_Gaji_dan_Tunjangan_ASN_2026_COMPACT.xlsx")
-    output_xls  = os.path.join(output_dir, "RKA_Penyediaan_Gaji_dan_Tunjangan_ASN_2026_COMPACT.xls")
+    output_xlsx = os.path.join(output_dir, "RKA_Sub_Kegiatan_COMPACT.xlsx")
+    output_xls  = os.path.join(output_dir, "RKA_Sub_Kegiatan_COMPACT.xls")
 
     if not os.path.exists(source_path):
         print(f"[ERROR] File sumber tidak ditemukan di:\n{source_path}")
+        print("Petunjuk: Pastikan nama file dan path folder sumber sudah benar.")
         return
 
     print("=" * 70)
@@ -63,6 +69,7 @@ try {{
     $shSrc = $wbSrc.Sheets.Item(1)
     
     $items = @()
+    # Rentang baris data rekening belanja dari hasil konversi PDFgear
     for ($r = 45; $r -le 172; $r++) {{
         $rek = $shSrc.Cells.Item($r, 2).Text.Trim()
         $uraian = $shSrc.Cells.Item($r, 4).Text.Trim()
@@ -101,21 +108,21 @@ try {{
     $sh1.Cells.Font.Name = "Segoe UI"
     $sh1.Cells.Font.Size = 9.5
     
-    # Kop Header RKA
-    $sh1.Cells.Item(1, 1).Value2 = "PEMERINTAH KABUPATEN BLITAR"
+    # Kop Header RKA (Silakan sesuaikan identitas Pemda / SKPD)
+    $sh1.Cells.Item(1, 1).Value2 = "PEMERINTAH DAERAH KABUPATEN / KOTA XXX"
     $sh1.Cells.Item(1, 1).Font.Size = 13
     $sh1.Cells.Item(1, 1).Font.Bold = $true
     
-    $sh1.Cells.Item(2, 1).Value2 = "RENCANA KERJA DAN ANGGARAN (RKA-BELANJA PERUBAHAN) - TAHUN ANGGARAN 2026"
+    $sh1.Cells.Item(2, 1).Value2 = "RENCANA KERJA DAN ANGGARAN (RKA-BELANJA) - TAHUN ANGGARAN XXXX"
     $sh1.Cells.Item(2, 1).Font.Size = 10.5
     $sh1.Cells.Item(2, 1).Font.Bold = $true
     
     $sh1.Cells.Item(4, 1).Value2 = "SKPD"
-    $sh1.Cells.Item(4, 2).Value2 = ": Dinas Komunikasi, Informatika, Statistik dan Persandian (2.16.2.20.2.21.01.0000)"
+    $sh1.Cells.Item(4, 2).Value2 = ": Dinas / Badan XXX (Kode SKPD: X.XX.X.XX.X.XX.XX.XXXX)"
     $sh1.Cells.Item(5, 1).Value2 = "Sub Kegiatan"
-    $sh1.Cells.Item(5, 2).Value2 = ": 2.16.01.2.02.0001 Penyediaan Gaji dan Tunjangan ASN"
+    $sh1.Cells.Item(5, 2).Value2 = ": X.XX.XX.X.XX.XXXX [Nama Sub Kegiatan XXX]"
     $sh1.Cells.Item(6, 1).Value2 = "Sumber Dana"
-    $sh1.Cells.Item(6, 2).Value2 = ": Dana Alokasi Umum (DAU) | Target: 37 Orang / bulan"
+    $sh1.Cells.Item(6, 2).Value2 = ": Dana Alokasi Umum (DAU) | Target: XX Orang / bulan"
     $sh1.Range("A4:A6").Font.Bold = $true
     
     # Header Tabel
@@ -385,23 +392,24 @@ try {{
     $sh3.Cells.Item(1, 1).Font.Size = 12
     $sh3.Cells.Item(1, 1).Font.Bold = $true
     
+    # Template metadata kegiatan (silakan disesuaikan dengan DPA/RKA SKPD Anda)
     $info = @(
-        @("Urusan Pemerintahan", "2 URUSAN PEMERINTAHAN WAJIB YANG TIDAK BERKAITAN DENGAN PELAYANAN DASAR"),
-        @("Bidang Urusan", "2.16 URUSAN PEMERINTAHAN BIDANG KOMUNIKASI DAN INFORMATIKA"),
-        @("Unit Organisasi", "2.16.2.20.2.21.01.0000 Dinas Komunikasi, Informatika, Statistik dan Persandian"),
-        @("Sub Unit Organisasi", "2.16.2.20.2.21.01.0000 Dinas Komunikasi, Informatika, Statistik dan Persandian"),
-        @("Program", "2.16.01 PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH KABUPATEN/KOTA"),
-        @("Kegiatan", "2.16.01.2.02 Administrasi Keuangan Perangkat Daerah"),
-        @("Sub Kegiatan", "2.16.01.2.02.0001 Penyediaan Gaji dan Tunjangan ASN"),
+        @("Urusan Pemerintahan", "X URUSAN PEMERINTAHAN WAJIB XXX"),
+        @("Bidang Urusan", "X.XX URUSAN PEMERINTAHAN BIDANG XXX"),
+        @("Unit Organisasi", "X.XX.X.XX.X.XX.XX.XXXX Dinas / Badan XXX"),
+        @("Sub Unit Organisasi", "X.XX.X.XX.X.XX.XX.XXXX Dinas / Badan XXX"),
+        @("Program", "X.XX.XX PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH XXX"),
+        @("Kegiatan", "X.XX.XX.X.XX Administrasi Keuangan Perangkat Daerah XXX"),
+        @("Sub Kegiatan", "X.XX.XX.X.XX.XXXX [Nama Sub Kegiatan XXX]"),
         @("Sumber Pendanaan", "Dana Alokasi Umum (DAU)"),
         @("Lokasi Pelaksanaan", "Semua Kota/Kab, Semua Kecamatan, Semua Kel/Desa"),
         @("Waktu Pelaksanaan", "Januari s.d Desember"),
-        @("Alokasi Tahun 2025", "Rp 0,00"),
-        @("Alokasi Tahun 2026", "Rp 3.674.068.000,00"),
-        @("Alokasi Tahun 2027", "Rp 0,00"),
-        @("Indikator Masukan (Sebelum)", "Dana yang dibutuhkan : Rp 3.985.562.324,00"),
-        @("Indikator Masukan (Sesudah)", "Dana yang dibutuhkan : Rp 3.674.068.000,00"),
-        @("Indikator Keluaran", "Jumlah Orang yang Menerima Gaji dan Tunjangan ASN : 37 Orang/bulan")
+        @("Alokasi Tahun n-1", "Rp 0,00"),
+        @("Alokasi Tahun n", "Rp XXX.XXX.XXX,00"),
+        @("Alokasi Tahun n+1", "Rp 0,00"),
+        @("Indikator Masukan (Sebelum)", "Dana yang dibutuhkan : Rp XXX.XXX.XXX,00"),
+        @("Indikator Masukan (Sesudah)", "Dana yang dibutuhkan : Rp XXX.XXX.XXX,00"),
+        @("Indikator Keluaran", "Jumlah Target Capaian / Tolak Ukur Kinerja : XX Orang/bulan")
     )
     
     for ($i = 0; $i -lt $info.Count; $i++) {{

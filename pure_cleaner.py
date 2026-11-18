@@ -1,3 +1,9 @@
+"""
+Versi 100% Python Murni (tanpa PowerShell/Excel COM).
+Memerlukan pustaka openpyxl dan xlrd.
+Multiplatform (Windows, Linux, macOS).
+"""
+
 import os
 import re
 import xlrd
@@ -6,12 +12,9 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 def bersihkan_rka_pure_python(source_path, output_path):
-    """
-    Versi 100% Python Murni (tanpa PowerShell/Excel COM).
-    Memerlukan pustaka openpyxl dan xlrd.
-    """
     if not os.path.exists(source_path):
         print(f"[ERROR] File tidak ditemukan: {source_path}")
+        print("Petunjuk: Pastikan nama file sumber .xls sudah benar dan berada di folder yang sesuai.")
         return
 
     wb_src = xlrd.open_workbook(source_path)
@@ -68,13 +71,14 @@ def bersihkan_rka_pure_python(source_path, output_path):
         bottom=Side(style='thin', color='EDEDED')
     )
 
-    ws["A1"] = "PEMERINTAH KABUPATEN BLITAR"
+    # Kop Header RKA (Silakan disesuaikan dengan instansi masing-masing)
+    ws["A1"] = "PEMERINTAH DAERAH KABUPATEN / KOTA XXX"
     ws["A1"].font = font_title
-    ws["A2"] = "RENCANA KERJA DAN ANGGARAN (RKA-BELANJA PERUBAHAN) - TAHUN ANGGARAN 2026"
+    ws["A2"] = "RENCANA KERJA DAN ANGGARAN (RKA-BELANJA) - TAHUN ANGGARAN XXXX"
     ws["A2"].font = font_sub
-    ws["A4"] = "SKPD: Dinas Komunikasi, Informatika, Statistik dan Persandian (2.16.2.20.2.21.01.0000)"
-    ws["A5"] = "Sub Kegiatan: 2.16.01.2.02.0001 Penyediaan Gaji dan Tunjangan ASN"
-    ws["A6"] = "Sumber Dana: Dana Alokasi Umum (DAU) | Target: 37 Orang / bulan"
+    ws["A4"] = "SKPD: Dinas / Badan XXX (Kode SKPD: X.XX.X.XX.X.XX.XX.XXXX)"
+    ws["A5"] = "Sub Kegiatan: X.XX.XX.X.XX.XXXX [Nama Sub Kegiatan XXX]"
+    ws["A6"] = "Sumber Dana: Dana Alokasi Umum (DAU) | Target: XX Orang / bulan"
 
     headers = [
         "Kode Rekening", "Uraian Belanja", "Sumber Dana",
@@ -169,6 +173,6 @@ def bersihkan_rka_pure_python(source_path, output_path):
     print(f"[SELESAI] File berhasil disimpan ke:\n{output_path}")
 
 if __name__ == "__main__":
-    src = "contoh_rka.xls"
-    dst = "RKA_COMPACT.xlsx"
+    src = "contoh_rka_cetak_sipd_xxx.xls"   # <-- Ganti dengan file .xls sumber Anda
+    dst = "RKA_Sub_Kegiatan_COMPACT.xlsx"   # <-- Nama file hasil output
     bersihkan_rka_pure_python(src, dst)
